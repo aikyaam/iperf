@@ -549,7 +549,22 @@ iperf_connect(struct iperf_test *test)
 	    warning(str);
 	}
     }
+	
+    if (test->protocol->id == Ptcp && !test->settings->blksize_set) {
+	int mss = test->settings->mss ? test->settings->mss : test->ctrl_sck_mss;
+	if (mss > 0) {
+	    int aligned = (DEFAULT_TCP_BLKSIZE / mss) * mss;
+	    if (aligned < mss)
+		aligned = mss;
+	    test->settings->blksize = aligned;
+	    if (test->verbose) {
+		printf("Setting TCP block size to %d (MSS %d)\n",
+		       test->settings->blksize, mss);
+	    }
+	  }
+    }
 
+	
     return 0;
 }
 
